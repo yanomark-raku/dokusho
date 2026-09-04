@@ -3,272 +3,81 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>青空文庫 朗読アプリ</title>
+    <title>青空文庫 朗読アプリ (Advanced Edition)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --color-bg: #f7f5f0;
-            --color-text: #3c3831;
-            --color-highlight: #e8e2d2;
-            --color-primary: #5c5445;
-        }
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            font-family: 'Hiragino Mincho ProN', 'Yu Mincho', 'YuMincho', 'Noto Serif JP', serif;
-            background-color: var(--color-bg);
-            color: var(--color-text);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 2rem 1rem;
-        }
-        .card {
-            width: 100%;
-            max-width: 900px;
-            background: rgba(255,255,255,0.75);
-            backdrop-filter: blur(4px);
-            border: 1px solid #d8d3c8;
-            border-radius: 1.25rem;
-            padding: 2.5rem;
-            display: flex;
-            flex-direction: column;
-            gap: 2rem;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.08);
-        }
-        header { text-align: center; }
-        header h1 {
-            font-size: 1.75rem;
-            font-weight: 700;
-            letter-spacing: 0.15em;
-            color: #4a4439;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-        header p { font-size: 0.8rem; color: #888; margin-top: 0.5rem; letter-spacing: 0.08em; }
-
-        /* URL入力エリア */
-        .input-section {
-            background: #faf9f6;
-            border: 1px solid #e8e3d8;
-            border-radius: 0.75rem;
-            padding: 1.25rem;
-        }
-        .input-section label {
-            display: block;
-            font-size: 0.8rem;
-            font-weight: 700;
-            color: #5c5445;
-            margin-bottom: 0.5rem;
-        }
-        .input-row { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-        input[type="url"], textarea {
-            flex: 1;
-            min-width: 0;
-            padding: 0.5rem 0.75rem;
-            background: #fff;
-            border: 1px solid #ccc;
-            border-radius: 0.5rem;
-            font-family: sans-serif;
-            font-size: 0.85rem;
-            color: #333;
-            outline: none;
-            transition: box-shadow 0.15s;
-        }
-        input[type="url"]:focus, textarea:focus {
-            box-shadow: 0 0 0 2px #a89f8f;
-        }
-        textarea { width: 100%; resize: vertical; min-height: 100px; }
-        .btn {
-            padding: 0.5rem 1.25rem;
-            background: #5c5445;
-            color: #fff;
-            border: none;
-            border-radius: 0.5rem;
-            font-size: 0.85rem;
-            font-weight: 700;
-            letter-spacing: 0.05em;
-            cursor: pointer;
-            transition: background 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 0.4rem;
-            white-space: nowrap;
-        }
-        .btn:hover { background: #4a4439; }
-        .btn:disabled { background: #aaa; cursor: not-allowed; }
-        .btn-sm {
-            background: transparent;
-            color: #888;
-            font-size: 0.75rem;
-            text-decoration: underline;
-            padding: 0;
-            cursor: pointer;
-            border: none;
-        }
-        .btn-sm:hover { color: #333; }
-        .fetch-log {
-            font-family: monospace;
-            font-size: 0.72rem;
-            color: #888;
-            margin-top: 0.5rem;
-            height: 1.2em;
-            overflow: hidden;
-        }
-        .spinner {
-            display: inline-block;
-            width: 14px; height: 14px;
-            border: 2px solid rgba(255,255,255,0.4);
-            border-top-color: #fff;
-            border-radius: 50%;
-            animation: spin 0.7s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .hidden { display: none !important; }
-
-        /* プレイヤーコントロール */
-        .controls {
-            background: rgba(245,242,235,0.6);
-            border: 1px solid #e0dbd0;
-            border-radius: 0.75rem;
-            padding: 1rem;
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-        .controls-top { display: flex; gap: 1rem; flex-wrap: wrap; }
-        .ctrl-group { display: flex; flex-direction: column; gap: 0.25rem; }
-        .ctrl-group.wide { flex: 1; min-width: 160px; }
-        .ctrl-group label { font-size: 0.72rem; color: #888; }
-        select {
-            background: #fff;
-            border: 1px solid #ccc;
-            border-radius: 0.4rem;
-            padding: 0.35rem 0.6rem;
-            font-size: 0.85rem;
-            outline: none;
-        }
-        .controls-bottom { display: flex; align-items: center; gap: 0.75rem; }
-        .icon-btn {
-            width: 44px; height: 44px;
-            border-radius: 50%;
-            border: none;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background 0.2s, transform 0.1s;
-            flex-shrink: 0;
-        }
-        .icon-btn:hover { transform: scale(1.08); }
-        .icon-btn.primary { background: #5c5445; color: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.18); }
-        .icon-btn.primary:hover { background: #4a4439; }
-        .icon-btn.secondary { background: #a09585; color: #fff; }
-        .icon-btn.secondary:hover { background: #8a7d70; }
-        .icon-btn.neutral { background: #ddd; color: #555; width: 36px; height: 36px; }
-        .icon-btn.neutral:hover { background: #ccc; }
-        .seek-wrap { flex: 1; display: flex; flex-direction: column; gap: 0.25rem; padding: 0 0.25rem; }
-        input[type="range"] {
-            width: 100%;
-            height: 6px;
-            accent-color: var(--color-primary);
-            cursor: pointer;
-        }
-        .seek-labels { display: flex; justify-content: space-between; font-size: 0.7rem; color: #aaa; }
-
-        /* 本文表示 */
-        article { border-top: 1px solid #e0dbd0; padding-top: 1.5rem; }
-        .work-header { text-align: center; margin-bottom: 1.5rem; }
-        #doc-title { font-size: 1.4rem; font-weight: 700; color: #3c3831; }
-        #doc-author { font-size: 1rem; color: #777; margin-top: 0.4rem; }
-        #text-container {
-            height: 50vh;
-            overflow-y: auto;
-            background: rgba(255,255,255,0.55);
-            padding: 2rem;
-            border-radius: 0.75rem;
-            border: 1px solid #e8e3d8;
-            box-shadow: inset 0 2px 8px rgba(0,0,0,0.04);
-            font-size: 1.1rem;
-            line-height: 2;
-            letter-spacing: 0.05em;
-            word-break: break-all;
-        }
-        #text-container::-webkit-scrollbar { width: 6px; }
-        #text-container::-webkit-scrollbar-track { background: transparent; }
-        #text-container::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
-        .sentence {
-            display: inline;
-            border-radius: 3px;
-            cursor: pointer;
-            transition: background 0.15s;
-            padding: 1px 2px;
-        }
-        .sentence:hover { background: #ece7da; }
-        .highlight {
-            background: var(--color-highlight);
-            box-shadow: 0 0 0 3px var(--color-highlight);
-            font-weight: 500;
-        }
-        .placeholder { color: #aaa; text-align: center; padding: 2rem 0; }
+        :root { --color-bg: #f7f5f0; --color-text: #3c3831; --color-highlight: #e8e2d2; --color-primary: #5c5445; }
+        body { font-family: 'Shippori Mincho', serif; background-color: var(--color-bg); color: var(--color-text); scroll-behavior: smooth; }
+        .text-scroll-area::-webkit-scrollbar { width: 8px; }
+        .text-scroll-area::-webkit-scrollbar-track { background: transparent; }
+        .text-scroll-area::-webkit-scrollbar-thumb { background-color: #d4cfc1; border-radius: 10px; }
+        .text-scroll-area::-webkit-scrollbar-thumb:hover { background-color: #b5b0a3; }
+        .highlight { background-color: var(--color-highlight); border-radius: 4px; box-shadow: 0 0 0 4px var(--color-highlight); font-weight: 500; transition: background-color 0.3s ease; }
+        .sentence { transition: background-color 0.2s ease; }
+        .sentence:hover { background-color: #ece7da; }
+        input[type=range] { accent-color: var(--color-primary); }
+        /* システムコンソール用 */
+        #fetch-log { font-family: monospace; font-size: 0.75rem; color: #6b7280; }
     </style>
 </head>
-<body>
-    <div class="card">
-        <header>
-            <h1>
-                <svg width="28" height="28" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                        d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                </svg>
+<body class="min-h-screen flex flex-col items-center py-8 px-4 sm:px-6">
+
+    <div class="w-full max-w-4xl bg-white/70 backdrop-blur-sm shadow-xl rounded-2xl p-6 md:p-10 flex flex-col gap-8 border border-stone-200">
+        
+        <header class="text-center space-y-2">
+            <h1 class="text-2xl md:text-3xl font-bold tracking-widest text-stone-700">
+                <svg class="w-8 h-8 inline-block mr-2 mb-1 text-stone-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
                 青空文庫 朗読
             </h1>
-            <p>洗練されたテキスト抽出と、確実な音声体験。</p>
+            <p class="text-sm text-stone-500 tracking-wide">洗練されたテキスト抽出と、確実な音声体験。</p>
         </header>
 
-        <!-- URL 入力 -->
-        <div class="input-section" id="url-section">
-            <label for="url-input">作品URLを入力（例：羅生門）</label>
-            <div class="input-row">
-                <input type="url" id="url-input"
-                    value="https://www.aozora.gr.jp/cards/000879/files/127_15260.html"
-                    placeholder="https://www.aozora.gr.jp/cards/...">
-                <button class="btn" id="fetch-btn">
-                    <span id="fetch-btn-text">読み込む</span>
-                    <span id="fetch-spinner" class="spinner hidden"></span>
+        <section class="bg-stone-50 p-5 rounded-xl border border-stone-100 shadow-sm relative">
+            <div id="url-section" class="flex flex-col gap-3">
+                <label for="url-input" class="text-sm font-bold text-stone-600">作品URLを入力 (例: 羅生門)</label>
+                <div class="flex flex-col sm:flex-row gap-3">
+                    <input type="url" id="url-input" value="https://www.aozora.gr.jp/cards/000879/files/127_15260.html" 
+                        class="flex-1 px-4 py-2 bg-white border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-400 font-sans text-sm text-stone-700" 
+                        placeholder="https://www.aozora.gr.jp/cards/...">
+                    <button id="fetch-btn" class="px-6 py-2 bg-stone-700 text-white rounded-lg hover:bg-stone-600 transition flex items-center justify-center font-bold tracking-wider">
+                        <span id="fetch-btn-text">読み込む</span>
+                        <svg id="fetch-spinner" class="animate-spin ml-2 h-4 w-4 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                    </button>
+                </div>
+                <!-- 内部の処理状況を見せる（システム企画の正人さん向け） -->
+                <div id="fetch-log" class="mt-1 h-4 overflow-hidden transition-all duration-300"></div>
+            </div>
+
+            <div id="text-section" class="flex flex-col gap-3 hidden">
+                <label for="manual-text-input" class="text-sm font-bold text-stone-600">テキストを直接貼り付け（ブラウザから全選択コピーでもOK）</label>
+                <textarea id="manual-text-input" rows="4" class="w-full px-4 py-2 bg-white border border-stone-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-stone-400 font-sans text-sm text-stone-700 leading-relaxed" placeholder="ここにテキストを貼り付けてください。ルビや不要な記号は自動で除去されます。"></textarea>
+                <div class="flex justify-end">
+                    <button id="load-text-btn" class="px-6 py-2 bg-stone-700 text-white rounded-lg hover:bg-stone-600 transition font-bold tracking-wider">解析して適用</button>
+                </div>
+            </div>
+
+            <div class="mt-3 text-right">
+                <button id="toggle-input-btn" class="text-xs text-stone-500 hover:text-stone-700 underline underline-offset-2 transition">
+                    手動コピペ入力モードに切り替え
                 </button>
             </div>
-            <div class="fetch-log" id="fetch-log"></div>
-            <div style="text-align:right; margin-top:0.5rem;">
-                <button class="btn-sm" id="toggle-input-btn">手動コピペ入力モードに切り替え</button>
-            </div>
-        </div>
+        </section>
 
-        <!-- 手動入力 -->
-        <div class="input-section hidden" id="text-section">
-            <label for="manual-text-input">テキストを直接貼り付け（ルビ・注記は自動除去）</label>
-            <textarea id="manual-text-input" rows="5"
-                placeholder="ここにテキストを貼り付けてください。"></textarea>
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem;">
-                <button class="btn-sm" id="toggle-input-btn2">URL入力モードに戻す</button>
-                <button class="btn" id="load-text-btn">解析して適用</button>
-            </div>
-        </div>
-
-        <!-- コントロール -->
-        <div class="controls">
-            <div class="controls-top">
-                <div class="ctrl-group wide">
-                    <label>音声モデル</label>
-                    <select id="voice-select">
-                        <option value="">（読み込み中...）</option>
+        <section class="bg-stone-100/50 p-4 rounded-xl border border-stone-200 flex flex-col gap-4">
+            <div class="flex flex-col sm:flex-row justify-between gap-4">
+                <div class="flex-1">
+                    <label class="block text-xs text-stone-500 mb-1">音声モデル</label>
+                    <select id="voice-select" class="w-full bg-white border border-stone-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-stone-400">
+                        <option value="">（音声を読み込み中...）</option>
                     </select>
                 </div>
-                <div class="ctrl-group">
-                    <label>再生速度</label>
-                    <select id="speed-select">
-                        <option value="1.0">1.0x（標準）</option>
+                <div class="sm:w-32">
+                    <label class="block text-xs text-stone-500 mb-1">再生速度</label>
+                    <select id="speed-select" class="w-full bg-white border border-stone-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-stone-400">
+                        <option value="1.0">1.0x (標準)</option>
                         <option value="1.25">1.25x</option>
                         <option value="1.5">1.5x</option>
                         <option value="1.75">1.75x</option>
@@ -276,480 +85,453 @@
                     </select>
                 </div>
             </div>
-            <div class="controls-bottom">
-                <button class="icon-btn primary" id="play-btn" title="再生">
-                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/>
-                    </svg>
+
+            <div class="flex items-center gap-4 mt-2">
+                <button id="play-btn" class="w-12 h-12 flex-shrink-0 flex items-center justify-center bg-stone-700 text-white rounded-full hover:bg-stone-600 shadow-md transition transform hover:scale-105" title="再生">
+                    <svg class="w-5 h-5 ml-1" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd" /></svg>
                 </button>
-                <button class="icon-btn secondary hidden" id="pause-btn" title="一時停止">
-                    <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                    </svg>
+                <button id="pause-btn" class="w-12 h-12 flex-shrink-0 flex items-center justify-center bg-stone-500 text-white rounded-full hover:bg-stone-600 shadow-md transition hidden" title="一時停止">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" /></svg>
                 </button>
-                <button class="icon-btn neutral" id="stop-btn" title="停止">
-                    <svg width="16" height="16" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd"/>
-                    </svg>
+                <button id="stop-btn" class="w-10 h-10 flex-shrink-0 flex items-center justify-center bg-stone-300 text-stone-700 rounded-full hover:bg-stone-400 transition" title="停止">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8 7a1 1 0 00-1 1v4a1 1 0 001 1h4a1 1 0 001-1V8a1 1 0 00-1-1H8z" clip-rule="evenodd" /></svg>
                 </button>
-                <div class="seek-wrap">
-                    <input type="range" id="seek-bar" min="0" max="0" value="0">
-                    <div class="seek-labels">
+                
+                <div class="flex-1 flex flex-col justify-center px-2">
+                    <input type="range" id="seek-bar" min="0" max="0" value="0" class="w-full h-2 bg-stone-200 rounded-lg appearance-none cursor-pointer">
+                    <div class="flex justify-between text-xs text-stone-400 mt-1">
                         <span id="progress-text">0 / 0</span>
                         <span>※任意の文をクリックでジャンプ</span>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- 本文 -->
-        <article>
-            <div class="work-header">
-                <div id="doc-title">作品タイトル</div>
-                <div id="doc-author">著者</div>
+        <article class="flex-1 border-t border-stone-200 pt-6 mt-2">
+            <div class="text-center mb-6">
+                <h2 id="doc-title" class="text-2xl font-bold text-stone-800 mb-2">作品タイトル</h2>
+                <h3 id="doc-author" class="text-lg text-stone-600">著者</h3>
             </div>
-            <div id="text-container">
-                <p class="placeholder">URLを入力して「読み込む」を押してください。</p>
+            
+            <div id="text-container" class="text-scroll-area h-[50vh] overflow-y-auto bg-white/50 p-6 sm:p-8 rounded-xl shadow-inner text-lg leading-loose tracking-wide break-words border border-stone-100">
+                <p class="text-stone-400 text-center mt-10">URLを入力して「読み込む」ボタンを押してください。<br>高度な抽出ロジックで本文のみを取り出します。</p>
             </div>
         </article>
     </div>
 
     <script>
-    // ─── 状態管理 ───────────────────────────────────────────────
-    let textNodes = [], sentences = [], currentIndex = 0, isPlaying = false;
-    const synth = window.speechSynthesis;
-    let currentUtterance = null, voices = [];
+        let textNodes = [], sentences = [], currentIndex = 0, isPlaying = false;
+        const synth = window.speechSynthesis;
+        let currentUtterance = null, voices = [];
 
-    const ui = {
-        urlInput:       document.getElementById('url-input'),
-        fetchBtn:       document.getElementById('fetch-btn'),
-        fetchBtnText:   document.getElementById('fetch-btn-text'),
-        fetchSpinner:   document.getElementById('fetch-spinner'),
-        fetchLog:       document.getElementById('fetch-log'),
-        voiceSelect:    document.getElementById('voice-select'),
-        speedSelect:    document.getElementById('speed-select'),
-        playBtn:        document.getElementById('play-btn'),
-        pauseBtn:       document.getElementById('pause-btn'),
-        stopBtn:        document.getElementById('stop-btn'),
-        seekBar:        document.getElementById('seek-bar'),
-        progressText:   document.getElementById('progress-text'),
-        docTitle:       document.getElementById('doc-title'),
-        docAuthor:      document.getElementById('doc-author'),
-        textContainer:  document.getElementById('text-container'),
-        urlSection:     document.getElementById('url-section'),
-        textSection:    document.getElementById('text-section'),
-        toggleBtn:      document.getElementById('toggle-input-btn'),
-        toggleBtn2:     document.getElementById('toggle-input-btn2'),
-        manualInput:    document.getElementById('manual-text-input'),
-        loadTextBtn:    document.getElementById('load-text-btn'),
-    };
+        const ui = {
+            urlInput: document.getElementById('url-input'),
+            fetchBtn: document.getElementById('fetch-btn'),
+            fetchBtnText: document.getElementById('fetch-btn-text'),
+            fetchSpinner: document.getElementById('fetch-spinner'),
+            fetchLog: document.getElementById('fetch-log'),
+            voiceSelect: document.getElementById('voice-select'),
+            speedSelect: document.getElementById('speed-select'),
+            playBtn: document.getElementById('play-btn'),
+            pauseBtn: document.getElementById('pause-btn'),
+            stopBtn: document.getElementById('stop-btn'),
+            seekBar: document.getElementById('seek-bar'),
+            progressText: document.getElementById('progress-text'),
+            docTitle: document.getElementById('doc-title'),
+            docAuthor: document.getElementById('doc-author'),
+            textContainer: document.getElementById('text-container'),
+            urlSection: document.getElementById('url-section'),
+            textSection: document.getElementById('text-section'),
+            toggleBtn: document.getElementById('toggle-input-btn'),
+            manualInput: document.getElementById('manual-text-input'),
+            loadTextBtn: document.getElementById('load-text-btn')
+        };
 
-    // ─── ログ出力 ────────────────────────────────────────────────
-    function logStatus(msg) {
-        console.log('[Fetch]', msg);
-        ui.fetchLog.textContent = '> ' + msg;
-    }
-
-    // ─── 音声リスト初期化 ─────────────────────────────────────────
-    function populateVoiceList() {
-        voices = synth.getVoices();
-        ui.voiceSelect.innerHTML = '';
-        const jpVoices = voices.filter(v => v.lang.startsWith('ja'));
-        if (jpVoices.length === 0) {
-            ui.voiceSelect.innerHTML = '<option value="">日本語音声が見つかりません</option>';
-            return;
+        function logStatus(msg) {
+            console.log(msg);
+            ui.fetchLog.textContent = `> ${msg}`;
         }
-        let bestIdx = 0;
-        jpVoices.forEach((voice, i) => {
-            const opt = document.createElement('option');
-            opt.value = voice.name;
-            opt.textContent = voice.name;
-            const n = voice.name.toLowerCase();
-            if (n.includes('nanami') || n.includes('kyoko') || n.includes('google')) bestIdx = i;
-            ui.voiceSelect.appendChild(opt);
-        });
-        ui.voiceSelect.selectedIndex = bestIdx;
-    }
-    populateVoiceList();
-    if (typeof speechSynthesis.onvoiceschanged !== 'undefined') {
-        speechSynthesis.onvoiceschanged = populateVoiceList;
-    }
 
-    // ─── テキスト取得エンジン（修正版）────────────────────────────────
-    /**
-     * 複数の手段でHTMLを取得する。優先順位：
-     *   1. GitHub aozorahack Mirror（UTF-8・CORSフリー）
-     *   2. corsproxy.io（安定したCORSプロキシ）
-     *   3. allorigins.win（別CORSプロキシ）
-     *   4. Wayback Machine id_（元データを改変なしで返す）
-     *
-     * エンコーディング自動検出：meta charsetをLatin-1で覗き見して判定。
-     */
-    async function fetchHtmlWithAbsoluteFallback(url) {
-        const encodedUrl = encodeURIComponent(url);
-        let urlObj;
-        try { urlObj = new URL(url); }
-        catch (e) { throw new Error('URLの形式が正しくありません。'); }
+        // 音声リストの初期化
+        function populateVoiceList() {
+            voices = synth.getVoices();
+            ui.voiceSelect.innerHTML = '';
+            const jpVoices = voices.filter(v => v.lang.includes('ja'));
+            
+            if (jpVoices.length === 0) {
+                ui.voiceSelect.innerHTML = '<option value="">日本語の音声が見つかりません</option>';
+                return;
+            }
 
-        const isAozora = urlObj.hostname.includes('aozora.gr.jp');
-        const strategies = [];
+            let bestMatchIndex = 0;
+            jpVoices.forEach((voice, index) => {
+                const option = document.createElement('option');
+                option.textContent = `${voice.name}`;
+                option.value = voice.name;
+                const nameLower = voice.name.toLowerCase();
+                // 優しい女性の声を優先
+                if (nameLower.includes('nanami') || nameLower.includes('kyoko') || nameLower.includes('google')) {
+                    bestMatchIndex = index;
+                }
+                ui.voiceSelect.appendChild(option);
+            });
+            ui.voiceSelect.selectedIndex = bestMatchIndex;
+        }
 
-        // ── Strategy 1: GitHub aozorahack Mirror ──────────────────────
-        // aozorahackはUTF-8変換済HTMLをGitHub Rawで提供（CORSエラーなし）
-        if (isAozora) {
-            const path = urlObj.pathname; // 例: /cards/000879/files/127_15260.html
+        populateVoiceList();
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = populateVoiceList;
+        }
+
+        /**
+         * 究極のフェッチエンジン: プロキシのエンコーディング破壊を完全に回避する3段構え
+         */
+        async function fetchHtmlWithAbsoluteFallback(url) {
+            const urlObj = new URL(url);
+            let strategies = [];
+
+            // 1. 青空文庫の場合、最強の「GitHub Raw API (UTF-8変換済・CORSフリー)」へ直結ルートを作成
+            if (urlObj.hostname.includes('aozora.gr.jp')) {
+                const path = urlObj.pathname; // 例: /cards/000879/files/127_15260.html
+                strategies.push({
+                    name: 'GitHub Mirror (aozorahack)',
+                    url: `https://raw.githubusercontent.com/aozorahack/aozorabunko_text/master${path}`,
+                    decoder: 'utf-8' // GitHub上はUTF-8で保存されているため文字化けしない
+                });
+                
+                // 2. Internet Archive (Wayback Machine) 生データ抽出 (CORSフリー、データ非破壊)
+                strategies.push({
+                    name: 'Wayback Machine API',
+                    url: `https://web.archive.org/web/2id_/${url}`,
+                    decoder: 'shift_jis' // オリジナルのまま返る
+                });
+            }
+
+            // 3. 汎用プロキシ (強制Blob取得で破壊を極力防ぐ)
             strategies.push({
-                name: 'GitHub Mirror (aozorahack)',
-                url:  `https://raw.githubusercontent.com/aozorahack/aozorabunko_text/master${path}`,
-                forceEncoding: 'utf-8',
+                name: 'CORS Proxy (codetabs)',
+                url: `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+                decoder: 'shift_jis'
+            });
+
+            for (const strategy of strategies) {
+                try {
+                    logStatus(`Connecting via: ${strategy.name}...`);
+                    const response = await fetch(strategy.url, { cache: 'no-store' });
+                    
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    
+                    const buffer = await response.arrayBuffer();
+                    let htmlString = new TextDecoder(strategy.decoder).decode(buffer);
+                    
+                    // 厳格な破壊チェック（Replacement Characterが入っていないか）
+                    if (htmlString.includes('')) {
+                        // 万が一のためのフォールバックデコード
+                        htmlString = new TextDecoder(strategy.decoder === 'shift_jis' ? 'utf-8' : 'shift_jis').decode(buffer);
+                        if (htmlString.includes('')) {
+                            throw new Error('Data corruption detected (Encoding destroyed by server).');
+                        }
+                    }
+
+                    // 取得成功の最低条件
+                    if (htmlString.includes('<body') || htmlString.includes('青空文庫')) {
+                        logStatus(`Success: Data extracted via ${strategy.name}`);
+                        return htmlString;
+                    } else {
+                        throw new Error('Invalid HTML structure.');
+                    }
+                } catch (error) {
+                    logStatus(`Failed via ${strategy.name}: ${error.message}`);
+                }
+            }
+            throw new Error(`全通信ルートが遮断、またはデータが破損しています。手動コピペ入力をご利用ください。`);
+        }
+
+        ui.fetchBtn.addEventListener('click', async () => {
+            const url = ui.urlInput.value.trim();
+            if (!url) return alert('URLを入力してください。');
+            
+            setLoading(true);
+            try {
+                const htmlString = await fetchHtmlWithAbsoluteFallback(url);
+                parseAndCleanHtml(htmlString);
+            } catch (error) {
+                console.error("Critical Fetch Error:", error);
+                alert(`${error.message}\n\n大変お手数ですが、ブラウザで作品ページを開き、本文を「テキスト直接貼り付け」エリアにコピーしてご利用ください（ルビ等は自動で消去されます）。`);
+            } finally {
+                setLoading(false);
+                setTimeout(() => { ui.fetchLog.textContent = ''; }, 3000);
+            }
+        });
+
+        function setLoading(isLoading) {
+            ui.fetchBtn.disabled = isLoading;
+            ui.fetchBtnText.textContent = isLoading ? '解析中...' : '読み込む';
+            isLoading ? ui.fetchSpinner.classList.remove('hidden') : ui.fetchSpinner.classList.add('hidden');
+        }
+
+        /**
+         * 完璧なノイズクリーニング・パーサー
+         */
+        function parseAndCleanHtml(html) {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            
+            const title = doc.querySelector('.title')?.innerText || 'タイトル不明';
+            const author = doc.querySelector('.author')?.innerText || '著者不明';
+            let mainTextElem = doc.querySelector('.main_text');
+            
+            // main_textがない場合（直接コピペなどの場合）はbody全体を対象にするフォールバック
+            if (!mainTextElem) {
+                mainTextElem = doc.body;
+            }
+
+            // ルビ要素（rt, rp）をDOMレベルで確実に取り除く
+            Array.from(mainTextElem.querySelectorAll('rt, rp')).forEach(el => el.remove());
+            Array.from(mainTextElem.querySelectorAll('br')).forEach(el => el.replaceWith('\n'));
+
+            let rawText = mainTextElem.innerText;
+            
+            // 青空文庫特有の記法を正規表現で【完全に】駆逐する
+            rawText = rawText.replace(/［＃[^］]+］/g, ''); // 注記（例：［＃ここから字下げ］など）
+            rawText = rawText.replace(/《[^》]+》/g, '');     // 残存する旧式ルビ
+            rawText = rawText.replace(/｜/g, '');           // ルビの掛かり始め記号
+            rawText = rawText.replace(/※\([^)]+\)/g, ''); // 外字注記（羅生門の「てへん＋丑」など）
+            rawText = rawText.replace(/〔[^〕]+〕/g, ''); // その他の校異記号
+
+            setupText(title, author, rawText);
+        }
+
+        // 手動コピペ入力モード
+        let isManualMode = false;
+        ui.toggleBtn.addEventListener('click', () => {
+            isManualMode = !isManualMode;
+            if (isManualMode) {
+                ui.urlSection.classList.add('hidden');
+                ui.textSection.classList.remove('hidden');
+                ui.toggleBtn.textContent = 'URL入力モードに戻す';
+            } else {
+                ui.urlSection.classList.remove('hidden');
+                ui.textSection.classList.add('hidden');
+                ui.toggleBtn.textContent = '手動コピペ入力モードに切り替え';
+            }
+        });
+
+        ui.loadTextBtn.addEventListener('click', () => {
+            const text = ui.manualInput.value.trim();
+            if (!text) return alert('テキストを入力してください。');
+            
+            // ユーザーがブラウザから雑にコピーした場合に備え、手動入力でもパーサーを通す
+            let cleanText = text.replace(/［＃[^］]+］/g, '')
+                                .replace(/《[^》]+》/g, '')
+                                .replace(/｜/g, '')
+                                .replace(/※\([^)]+\)/g, '');
+                                
+            setupText('手動入力テキスト', '解析完了', cleanText);
+        });
+
+        // テキストのセンテンス分割
+        function setupText(title, author, rawText) {
+            ui.docTitle.textContent = title;
+            ui.docAuthor.textContent = author;
+            
+            textNodes = [];
+            sentences = [];
+            let sIndex = 0;
+            
+            const paragraphs = rawText.split('\n');
+            
+            paragraphs.forEach((p, pIdx) => {
+                const trimmed = p.trim();
+                if (trimmed) {
+                    // 日本語の句読点構造に基づく精密な分割
+                    const sents = trimmed.match(/[^。！？]+[。！？]*/g);
+                    if (sents) {
+                        sents.forEach(s => {
+                            const sTrimmed = s.trim();
+                            if (sTrimmed) {
+                                textNodes.push({ type: 'text', content: sTrimmed, index: sIndex });
+                                sentences.push(sTrimmed);
+                                sIndex++;
+                            }
+                        });
+                    } else {
+                        textNodes.push({ type: 'text', content: trimmed, index: sIndex });
+                        sentences.push(trimmed);
+                        sIndex++;
+                    }
+                }
+                
+                if (pIdx < paragraphs.length - 1) {
+                    textNodes.push({ type: 'newline' });
+                }
+            });
+            
+            currentIndex = 0;
+            stopSpeech(); 
+            renderText();
+            updateSeekBar();
+        }
+
+        // 描画
+        function renderText() {
+            ui.textContainer.innerHTML = '';
+            
+            textNodes.forEach(node => {
+                if (node.type === 'newline') {
+                    const br = document.createElement('div');
+                    br.className = 'h-4';
+                    ui.textContainer.appendChild(br);
+                } else {
+                    const span = document.createElement('span');
+                    span.textContent = node.content;
+                    span.dataset.index = node.index;
+                    span.className = 'sentence cursor-pointer rounded px-[2px] mx-[1px] inline-block';
+                    
+                    if (node.index === currentIndex) {
+                        span.classList.add('highlight');
+                    }
+                    
+                    span.addEventListener('click', () => {
+                        currentIndex = node.index;
+                        updateHighlight();
+                        updateSeekBar();
+                        playFromCurrent();
+                    });
+                    
+                    ui.textContainer.appendChild(span);
+                }
             });
         }
 
-        // ── Strategy 2: corsproxy.io ───────────────────────────────────
-        // 安定したパブリックCORSプロキシ（元の Content-Type/バイト列をそのまま中継）
-        strategies.push({
-            name: 'corsproxy.io',
-            url:  `https://corsproxy.io/?${encodedUrl}`,
-            forceEncoding: null,  // 自動検出
-        });
-
-        // ── Strategy 3: allorigins.win ────────────────────────────────
-        // /raw エンドポイントはバイナリをそのまま返す
-        strategies.push({
-            name: 'allorigins.win',
-            url:  `https://api.allorigins.win/raw?url=${encodedUrl}`,
-            forceEncoding: null,
-        });
-
-        // ── Strategy 4: Wayback Machine id_ ──────────────────────────
-        // "id_" = Identity変換（Waybackラッパーなしで元HTMLをそのまま返す）
-        // ※旧コードの "2id_" は誤り → 正しくは "id_"
-        strategies.push({
-            name: 'Wayback Machine (id_)',
-            url:  `https://web.archive.org/web/id_/${url}`,
-            forceEncoding: null,
-        });
-
-        // ─── 各戦略を順番に試す ──────────────────────────────────────
-        for (const strategy of strategies) {
-            try {
-                logStatus(`接続中: ${strategy.name} ...`);
-                const res = await fetch(strategy.url, {
-                    cache: 'no-store',
-                    headers: { Accept: 'text/html,application/xhtml+xml,*/*' },
-                });
-
-                if (!res.ok) throw new Error(`HTTP ${res.status}`);
-
-                const buffer = await res.arrayBuffer();
-                if (buffer.byteLength < 200) throw new Error('レスポンスが短すぎます');
-
-                // エンコーディング判定
-                let encoding = strategy.forceEncoding;
-                if (!encoding) {
-                    // HTMLのmeta charsetをASCII互換範囲だけLatin-1で読んで検出
-                    const peek = new TextDecoder('latin1').decode(
-                        new Uint8Array(buffer, 0, Math.min(buffer.byteLength, 3000))
-                    );
-                    if (/charset\s*=\s*["']?\s*utf-8/i.test(peek)) {
-                        encoding = 'utf-8';
-                    } else if (/charset\s*=\s*["']?\s*(shift.jis|x-sjis|windows-31j)/i.test(peek)) {
-                        encoding = 'shift_jis';
-                    } else {
-                        // 青空文庫はデフォルトShift-JIS、それ以外はUTF-8
-                        encoding = isAozora ? 'shift_jis' : 'utf-8';
-                    }
-                }
-
-                let html = new TextDecoder(encoding).decode(buffer);
-
-                // 文字化けチェック（置換文字 U+FFFD が大量にある場合は逆エンコードを試みる）
-                const badCount = (html.match(/�/g) || []).length;
-                if (badCount > 10) {
-                    const alt = encoding === 'shift_jis' ? 'utf-8' : 'shift_jis';
-                    const altHtml = new TextDecoder(alt).decode(buffer);
-                    const altBad  = (altHtml.match(/�/g) || []).length;
-                    if (altBad < badCount) {
-                        html = altHtml;
-                    } else {
-                        throw new Error(`エンコーディングエラー（置換文字 ${badCount} 個）`);
-                    }
-                }
-
-                // コンテンツ有効性チェック
-                const hasBody    = html.includes('<body');
-                const hasAozora  = html.includes('青空') || html.includes('aozora');
-                const hasMainTxt = html.includes('main_text');
-                const isLong     = html.length > 1500;
-
-                if (hasBody || hasAozora || hasMainTxt || isLong) {
-                    logStatus(`取得成功: ${strategy.name}`);
-                    return html;
-                }
-                throw new Error('有効なHTMLコンテンツが見つかりません');
-
-            } catch (err) {
-                logStatus(`失敗 [${strategy.name}]: ${err.message}`);
+        // ハイライトとスクロール同期
+        function updateHighlight() {
+            const currentHighlighted = ui.textContainer.querySelector('.highlight');
+            if (currentHighlighted) currentHighlighted.classList.remove('highlight');
+            
+            const target = ui.textContainer.querySelector(`span[data-index="${currentIndex}"]`);
+            if (target) {
+                target.classList.add('highlight');
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
             }
         }
 
-        throw new Error(
-            'すべての通信ルートが失敗しました。\n' +
-            '「手動コピペ入力」モードで本文を貼り付けてご利用ください。'
-        );
-    }
-
-    // ─── フェッチボタン ─────────────────────────────────────────
-    ui.fetchBtn.addEventListener('click', async () => {
-        const url = ui.urlInput.value.trim();
-        if (!url) { alert('URLを入力してください。'); return; }
-
-        setLoading(true);
-        try {
-            const html = await fetchHtmlWithAbsoluteFallback(url);
-            parseAndCleanHtml(html);
-        } catch (err) {
-            console.error('Fetch error:', err);
-            alert(err.message + '\n\n大変恐れ入りますが、ブラウザで作品ページを開き、'
-                + '本文を「手動コピペ入力」エリアにコピーしてご利用ください。');
-        } finally {
-            setLoading(false);
-            setTimeout(() => { ui.fetchLog.textContent = ''; }, 4000);
-        }
-    });
-
-    function setLoading(loading) {
-        ui.fetchBtn.disabled = loading;
-        ui.fetchBtnText.textContent = loading ? '解析中...' : '読み込む';
-        ui.fetchSpinner.classList.toggle('hidden', !loading);
-    }
-
-    // ─── HTMLパース・クリーニング ─────────────────────────────────
-    /**
-     * 青空文庫のHTML（または生テキスト）から本文を抽出し、
-     * ルビ・注記・外字記法などを除去してsetTextに渡す。
-     */
-    function parseAndCleanHtml(html) {
-        const parser = new DOMParser();
-        const doc    = parser.parseFromString(html, 'text/html');
-
-        // タイトル・著者
-        const title  = (doc.querySelector('.title')?.textContent
-                      || doc.querySelector('h1')?.textContent
-                      || '').trim() || 'タイトル不明';
-        const author = (doc.querySelector('.author')?.textContent
-                      || doc.querySelector('h2')?.textContent
-                      || '').trim() || '著者不明';
-
-        // 本文要素
-        let main = doc.querySelector('.main_text')
-                || doc.querySelector('#main_text')
-                || doc.querySelector('div[class*="honbun"]')
-                || doc.body;
-
-        // 不要要素を削除
-        main.querySelectorAll('rt, rp, script, style, .notes, .bibliographical-information').forEach(el => el.remove());
-        // <br> を改行テキストに置換
-        main.querySelectorAll('br').forEach(el => el.replaceWith('\n'));
-
-        let rawText = main.textContent || '';
-
-        // 青空文庫特有の記法を除去
-        rawText = rawText
-            .replace(/［＃[^］]*］/g, '')      // ［＃注記］
-            .replace(/《[^》]*》/g, '')          // 《ルビ》
-            .replace(/｜/g, '')                  // ルビ掛かり始め
-            .replace(/〔[^〕]*〕/g, '')          // 〔校異〕
-            .replace(/※（[^）]*）/g, '')         // ※（外字注記）
-            .replace(/※\([^)]*\)/g, '')          // ※(外字注記) 半角括弧版
-            .replace(/\r\n/g, '\n')
-            .replace(/\r/g, '\n');
-
-        setupText(title, author, rawText);
-    }
-
-    // ─── 手動入力モード ─────────────────────────────────────────
-    let isManualMode = false;
-
-    function switchToManual() {
-        isManualMode = true;
-        ui.urlSection.classList.add('hidden');
-        ui.textSection.classList.remove('hidden');
-    }
-    function switchToUrl() {
-        isManualMode = false;
-        ui.urlSection.classList.remove('hidden');
-        ui.textSection.classList.add('hidden');
-    }
-    ui.toggleBtn.addEventListener('click', switchToManual);
-    ui.toggleBtn2.addEventListener('click', switchToUrl);
-
-    ui.loadTextBtn.addEventListener('click', () => {
-        const text = ui.manualInput.value.trim();
-        if (!text) { alert('テキストを入力してください。'); return; }
-        const clean = text
-            .replace(/［＃[^］]*］/g, '')
-            .replace(/《[^》]*》/g, '')
-            .replace(/｜/g, '')
-            .replace(/〔[^〕]*〕/g, '')
-            .replace(/※（[^）]*）/g, '')
-            .replace(/※\([^)]*\)/g, '');
-        setupText('手動入力テキスト', '解析完了', clean);
-    });
-
-    // ─── テキストセットアップ ────────────────────────────────────
-    function setupText(title, author, rawText) {
-        ui.docTitle.textContent = title;
-        ui.docAuthor.textContent = author;
-
-        textNodes  = [];
-        sentences  = [];
-        let sIndex = 0;
-
-        rawText.split('\n').forEach((line, lineIdx, arr) => {
-            const t = line.trim();
-            if (t) {
-                const parts = t.match(/[^。！？…]+[。！？…]*/g) || [t];
-                parts.forEach(s => {
-                    const st = s.trim();
-                    if (st) {
-                        textNodes.push({ type: 'text', content: st, index: sIndex });
-                        sentences.push(st);
-                        sIndex++;
-                    }
-                });
-            }
-            if (lineIdx < arr.length - 1) {
-                textNodes.push({ type: 'newline' });
-            }
-        });
-
-        currentIndex = 0;
-        stopSpeech();
-        renderText();
-        updateSeekBar();
-    }
-
-    // ─── レンダリング ────────────────────────────────────────────
-    function renderText() {
-        ui.textContainer.innerHTML = '';
-        if (textNodes.length === 0) {
-            ui.textContainer.innerHTML = '<p class="placeholder">テキストが空です。</p>';
-            return;
-        }
-        textNodes.forEach(node => {
-            if (node.type === 'newline') {
-                const br = document.createElement('div');
-                br.style.height = '0.8em';
-                ui.textContainer.appendChild(br);
+        // コントロールUI更新
+        function updateSeekBar() {
+            const total = sentences.length;
+            if (total > 0) {
+                ui.seekBar.max = total - 1;
+                ui.seekBar.value = currentIndex;
+                ui.progressText.textContent = `${currentIndex + 1} / ${total}`;
             } else {
-                const span = document.createElement('span');
-                span.textContent = node.content;
-                span.dataset.index = node.index;
-                span.className = 'sentence';
-                if (node.index === currentIndex) span.classList.add('highlight');
-                span.addEventListener('click', () => {
-                    currentIndex = node.index;
-                    updateHighlight();
-                    updateSeekBar();
-                    playFromCurrent();
-                });
-                ui.textContainer.appendChild(span);
+                ui.seekBar.max = 0;
+                ui.seekBar.value = 0;
+                ui.progressText.textContent = `0 / 0`;
             }
-        });
-    }
-
-    function updateHighlight() {
-        ui.textContainer.querySelector('.highlight')?.classList.remove('highlight');
-        const t = ui.textContainer.querySelector(`span[data-index="${currentIndex}"]`);
-        if (t) {
-            t.classList.add('highlight');
-            t.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
-    }
 
-    function updateSeekBar() {
-        const total = sentences.length;
-        ui.seekBar.max   = Math.max(0, total - 1);
-        ui.seekBar.value = currentIndex;
-        ui.progressText.textContent = total > 0 ? `${currentIndex + 1} / ${total}` : '0 / 0';
-    }
-
-    function updateButtons() {
-        ui.playBtn.classList.toggle('hidden', isPlaying);
-        ui.pauseBtn.classList.toggle('hidden', !isPlaying);
-    }
-
-    // ─── 音声再生エンジン ────────────────────────────────────────
-    function playFromCurrent() {
-        synth.cancel();
-        if (sentences.length === 0 || currentIndex >= sentences.length) {
-            isPlaying = false;
-            updateButtons();
-            return;
-        }
-        isPlaying = true;
-        updateButtons();
-        speakSentence();
-    }
-
-    function speakSentence() {
-        if (!isPlaying || currentIndex >= sentences.length) {
-            isPlaying = false;
-            updateButtons();
-            return;
-        }
-        currentUtterance = new SpeechSynthesisUtterance(sentences[currentIndex]);
-        const voice = voices.find(v => v.name === ui.voiceSelect.value);
-        if (voice) currentUtterance.voice = voice;
-        currentUtterance.rate = parseFloat(ui.speedSelect.value);
-
-        currentUtterance.onend = () => {
-            if (!isPlaying) return;
-            currentIndex++;
-            updateHighlight();
-            updateSeekBar();
-            if (currentIndex < sentences.length) {
-                setTimeout(() => { if (isPlaying) speakSentence(); }, 200);
+        function updateButtons() {
+            if (isPlaying) {
+                ui.playBtn.classList.add('hidden');
+                ui.pauseBtn.classList.remove('hidden');
             } else {
+                ui.playBtn.classList.remove('hidden');
+                ui.pauseBtn.classList.add('hidden');
+            }
+        }
+
+        // 堅牢な音声再生エンジン
+        function playFromCurrent() {
+            synth.cancel(); 
+            if (sentences.length === 0 || currentIndex >= sentences.length) {
                 isPlaying = false;
                 updateButtons();
+                return;
             }
-        };
-        currentUtterance.onerror = e => {
-            if (e.error !== 'canceled') { console.error('TTS error:', e); isPlaying = false; updateButtons(); }
-        };
-        synth.speak(currentUtterance);
-    }
+            
+            isPlaying = true;
+            updateButtons();
+            speakSentence();
+        }
 
-    function pauseSpeech() { synth.cancel(); isPlaying = false; updateButtons(); }
-    function stopSpeech()  {
-        synth.cancel();
-        isPlaying = false;
-        currentIndex = 0;
-        updateHighlight();
-        updateSeekBar();
-        updateButtons();
-        ui.textContainer.scrollTop = 0;
-    }
+        function speakSentence() {
+            if (!isPlaying || currentIndex >= sentences.length) {
+                isPlaying = false;
+                updateButtons();
+                return;
+            }
+            
+            const textToSpeak = sentences[currentIndex];
+            currentUtterance = new SpeechSynthesisUtterance(textToSpeak);
+            
+            const selectedVoiceName = ui.voiceSelect.value;
+            const voice = voices.find(v => v.name === selectedVoiceName);
+            if (voice) currentUtterance.voice = voice;
+            currentUtterance.rate = parseFloat(ui.speedSelect.value);
+            
+            currentUtterance.onend = (e) => {
+                if (!isPlaying) return; 
+                
+                currentIndex++;
+                updateHighlight();
+                updateSeekBar();
+                
+                if (currentIndex < sentences.length) {
+                    setTimeout(() => {
+                        if (isPlaying) speakSentence();
+                    }, 250); // 句読点間の思索的な「間」
+                } else {
+                    isPlaying = false;
+                    updateButtons();
+                }
+            };
+            
+            currentUtterance.onerror = (e) => {
+                if (e.error !== 'canceled') {
+                    console.error('Speech Synthesis Error:', e);
+                    isPlaying = false;
+                    updateButtons();
+                }
+            };
+            
+            synth.speak(currentUtterance);
+        }
 
-    // ─── イベントバインド ─────────────────────────────────────────
-    ui.playBtn.addEventListener('click', () => {
-        if (sentences.length === 0) { alert('先にテキストを読み込んでください。'); return; }
-        playFromCurrent();
-    });
-    ui.pauseBtn.addEventListener('click', pauseSpeech);
-    ui.stopBtn.addEventListener('click', stopSpeech);
-    ui.seekBar.addEventListener('input', e => {
-        currentIndex = parseInt(e.target.value, 10);
-        updateHighlight();
-        ui.progressText.textContent = `${currentIndex + 1} / ${sentences.length}`;
-    });
-    ui.seekBar.addEventListener('change', () => { if (isPlaying) playFromCurrent(); });
-    ui.speedSelect.addEventListener('change', () => { if (isPlaying) playFromCurrent(); });
-    ui.voiceSelect.addEventListener('change', () => { if (isPlaying) playFromCurrent(); });
-    window.addEventListener('beforeunload', () => synth.cancel());
+        function pauseSpeech() {
+            synth.cancel();
+            isPlaying = false;
+            updateButtons();
+        }
+
+        function stopSpeech() {
+            synth.cancel();
+            isPlaying = false;
+            currentIndex = 0;
+            updateHighlight();
+            updateSeekBar();
+            updateButtons();
+            ui.textContainer.scrollTop = 0;
+        }
+
+        // イベントバインド
+        ui.playBtn.addEventListener('click', () => {
+            if (sentences.length === 0) return alert('先にテキストを読み込んでください。');
+            playFromCurrent();
+        });
+        ui.pauseBtn.addEventListener('click', pauseSpeech);
+        ui.stopBtn.addEventListener('click', stopSpeech);
+        
+        ui.seekBar.addEventListener('input', (e) => {
+            currentIndex = parseInt(e.target.value, 10);
+            updateHighlight();
+            ui.progressText.textContent = `${currentIndex + 1} / ${sentences.length}`;
+        });
+        ui.seekBar.addEventListener('change', () => { if (isPlaying) playFromCurrent(); });
+        ui.speedSelect.addEventListener('change', () => { if (isPlaying) playFromCurrent(); });
+        ui.voiceSelect.addEventListener('change', () => { if (isPlaying) playFromCurrent(); });
+
+        window.addEventListener('beforeunload', () => synth.cancel());
+
     </script>
 </body>
 </html>
-
